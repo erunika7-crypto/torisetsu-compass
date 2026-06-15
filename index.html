@@ -1024,8 +1024,9 @@ body.compass-only .board-note {
     }
 
     body.compass-only .work-card {
-        width: 100dvh;
-        height: 100dvw;
+        width: min(100dvh, 150.2dvw);
+        height: auto;
+        aspect-ratio: 1400 / 932;
         max-width: none;
         max-height: none;
         transform: rotate(-90deg);
@@ -2444,6 +2445,44 @@ function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
+function isPortraitCompassRotated() {
+    return Boolean(
+        document.body.classList.contains("compass-only") &&
+        window.matchMedia &&
+        window.matchMedia("(orientation: portrait)").matches
+    );
+}
+
+function boardPointFromEvent(event, board) {
+    const boardRect = board.getBoundingClientRect();
+    if (!boardRect.width || !boardRect.height) {
+        return { x: 50, y: 50 };
+    }
+
+    if (isPortraitCompassRotated()) {
+        const screenX = (event.clientX - boardRect.left) / boardRect.width;
+        const screenY = (event.clientY - boardRect.top) / boardRect.height;
+        return {
+            x: (1 - screenY) * 100,
+            y: screenX * 100
+        };
+    }
+
+    return {
+        x: ((event.clientX - boardRect.left) / boardRect.width) * 100,
+        y: ((event.clientY - boardRect.top) / boardRect.height) * 100
+    };
+}
+
+function noteCenterPercent(note) {
+    const x = parseFloat(note.style.left);
+    const y = parseFloat(note.style.top);
+    return {
+        x: Number.isFinite(x) ? x : 50,
+        y: Number.isFinite(y) ? y : 50
+    };
+}
+
 function bindBoardDrag() {
     const board = document.getElementById("interactive-compass");
     if (!board) return;
@@ -2465,12 +2504,8 @@ function bindBoardDrag() {
             if (!key || key === "placeholder") return;
             if (event.pointerType === "mouse" && event.button !== 0) return;
 
-            const boardRect = board.getBoundingClientRect();
-            const noteRect = note.getBoundingClientRect();
-            const pointerX = ((event.clientX - boardRect.left) / boardRect.width) * 100;
-            const pointerY = ((event.clientY - boardRect.top) / boardRect.height) * 100;
-            const centerX = ((noteRect.left + noteRect.width / 2 - boardRect.left) / boardRect.width) * 100;
-            const centerY = ((noteRect.top + noteRect.height / 2 - boardRect.top) / boardRect.height) * 100;
+            const pointer = boardPointFromEvent(event, board);
+            const center = noteCenterPercent(note);
 
             active = {
                 key,
@@ -2479,8 +2514,8 @@ function bindBoardDrag() {
                 dragging: false,
                 startClientX: event.clientX,
                 startClientY: event.clientY,
-                offsetX: centerX - pointerX,
-                offsetY: centerY - pointerY,
+                offsetX: center.x - pointer.x,
+                offsetY: center.y - pointer.y,
                 overTrash: false
             };
             if (note.setPointerCapture) {
@@ -2500,9 +2535,9 @@ function bindBoardDrag() {
                     document.activeElement.blur();
                 }
             }
-            const boardRect = board.getBoundingClientRect();
-            const x = clamp(((event.clientX - boardRect.left) / boardRect.width) * 100 + active.offsetX, 8, 92);
-            const y = clamp(((event.clientY - boardRect.top) / boardRect.height) * 100 + active.offsetY, 10, 90);
+            const pointer = boardPointFromEvent(event, board);
+            const x = clamp(pointer.x + active.offsetX, 8, 92);
+            const y = clamp(pointer.y + active.offsetY, 10, 90);
             active.note.style.left = `${x}%`;
             active.note.style.top = `${y}%`;
             state.boardPositions = state.boardPositions || {};
