@@ -1005,25 +1005,66 @@ body.compass-only .board-note {
 }
 
 @media (orientation: portrait) {
+    body.compass-only {
+        --control-size: clamp(40px, 10dvw, 50px);
+        --control-bottom: max(10px, calc(env(safe-area-inset-bottom) + 8px));
+        --control-side: max(12px, calc(env(safe-area-inset-left) + 12px));
+        --note-height: clamp(30px, 8dvw, 38px);
+        --note-font-size: clamp(12px, 3.6dvw, 15px);
+    }
+
+    body.compass-only .app-main {
+        padding: 0;
+    }
+
+    body.compass-only .compass-app-shell {
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+    }
+
+    body.compass-only .work-card {
+        width: 100dvh;
+        height: 100dvw;
+        max-width: none;
+        max-height: none;
+        transform: rotate(-90deg);
+        transform-origin: center;
+    }
+
+    body.compass-only .interactive-compass {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        aspect-ratio: auto;
+    }
+
+    body.compass-only .interactive-compass::after {
+        inset: 8px;
+    }
+
     body.compass-only .rotate-hint {
         position: fixed;
-        top: 50%;
+        top: max(9px, calc(env(safe-area-inset-top) + 8px));
         left: 50%;
         z-index: 20;
         display: block;
-        width: min(82vw, 320px);
-        transform: translate(-50%, -50%);
+        width: auto;
+        max-width: calc(100vw - 24px);
+        transform: translateX(-50%);
         margin: 0;
-        padding: 13px 18px;
+        padding: 8px 13px;
         border: 1px solid rgba(128, 103, 84, 0.22);
         border-radius: 999px;
-        background: rgba(255, 253, 248, 0.82);
-        color: rgba(94, 72, 58, 0.86);
+        background: rgba(255, 253, 248, 0.68);
+        color: rgba(94, 72, 58, 0.78);
         font-family: var(--heading);
-        font-size: 15px;
-        letter-spacing: 0.08em;
+        font-size: 12px;
+        letter-spacing: 0.06em;
         text-align: center;
-        box-shadow: 0 14px 32px rgba(80, 62, 48, 0.12);
+        white-space: nowrap;
+        box-shadow: 0 10px 22px rgba(80, 62, 48, 0.08);
         backdrop-filter: blur(12px);
         pointer-events: none;
     }
@@ -1171,7 +1212,9 @@ body.compass-only .board-note {
 </head>
 <body data-app-mode="compass">
     <main id="app" class="app-main"></main>
+
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
     <script>
 const lessons = [
     {
@@ -2248,7 +2291,7 @@ function renderCompassOnly() {
     return `
         <section class="compass-app-shell">
             ${renderInteractiveCompass(notes)}
-            <p class="rotate-hint" role="status">iPhoneを横向きにしてください</p>
+            <p class="rotate-hint" role="status">端末を横に持って使えます</p>
         </section>
     `;
 }
