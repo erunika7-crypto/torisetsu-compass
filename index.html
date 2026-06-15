@@ -1024,13 +1024,11 @@ body.compass-only .board-note {
     }
 
     body.compass-only .work-card {
-        width: min(100dvh, 150.2dvw);
+        width: min(100dvw, 150.2dvh);
         height: auto;
         aspect-ratio: 1400 / 932;
         max-width: none;
         max-height: none;
-        transform: rotate(-90deg);
-        transform-origin: center;
     }
 
     body.compass-only .interactive-compass {
@@ -2446,11 +2444,12 @@ function clamp(value, min, max) {
 }
 
 function isPortraitCompassRotated() {
-    return Boolean(
-        document.body.classList.contains("compass-only") &&
-        window.matchMedia &&
-        window.matchMedia("(orientation: portrait)").matches
-    );
+    if (!document.body.classList.contains("compass-only")) return false;
+    if (!window.matchMedia || !window.matchMedia("(orientation: portrait)").matches) return false;
+    const card = document.querySelector("#compass-map");
+    if (!card || !window.getComputedStyle) return false;
+    const transform = window.getComputedStyle(card).transform;
+    return Boolean(transform && transform !== "none");
 }
 
 function boardPointFromEvent(event, board) {
