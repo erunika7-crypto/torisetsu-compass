@@ -1,4 +1,4 @@
-const CACHE_NAME = "torisetsu-compass-v5";
+const CACHE_NAME = "torisetsu-compass-v6";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
